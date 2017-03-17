@@ -1,0 +1,39 @@
+---
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  become: True
+  tasks:
+    - name: Innstall PPS tools
+      apt:
+         name: pps-tools
+         state: present
+    - name: Install gpsd
+      apt: 
+         name: gpsd
+         state: present
+    - name: Install gpsd-clients
+      apt:
+         name: gpsd-clients
+         state: present
+    - name: Install Default Config for GPSD
+      copy:
+         src: template/default/gpsd
+         dest: /etc/default/gpsd
+         owner: root 
+         group: root
+    - name: Make NTPD pay attention to GPSD
+      copy:
+         src: template/ntp.conf
+         dest: /etc/ntp.conf
+         owner: root
+         group: root
+    - name: Restart NTPD
+      service: 
+         name: ntp
+         enabled: yes
+         state: restarted
+    - name: Restart GPSD
+      service: 
+         name: gpsd
+         enabled: yes
+         state: restarted
